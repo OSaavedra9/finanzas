@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Finanzas Personales Universal</title>
+    <title>Finanzas Personales Cloud</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -13,7 +13,26 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <script>
+        // Configuración oficial de Firebase con tus credenciales
+        const firebaseConfig = {
+            apiKey: "AIzaSyABWITpDEGg7cQaOjoycOAWkD6GewzkOn8",
+            authDomain: "misfinanzas-e5157.firebaseapp.com",
+            databaseURL: "https://misfinanzas-e5157-default-rtdb.firebaseio.com",
+            projectId: "misfinanzas-e5157",
+            storageBucket: "misfinanzas-e5157.firebasestorage.app",
+            messagingSenderId: "267467322644",
+            appId: "1:267467322644:web:45d87c95e7cd966a28be01"
+        };
+        
+        // Inicializar Firebase Realtime Database
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         tailwind.config = {
             theme: {
                 extend: {
@@ -48,7 +67,9 @@
                     </div>
                     <div>
                         <h1 class="font-bold text-base leading-tight">Mis Finanzas</h1>
-                        <p class="text-xs text-slate-400">Control Universal</p>
+                        <p class="text-xs text-emerald-400 flex items-center gap-1 mt-0.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Nube Sincronizada
+                        </p>
                     </div>
                 </div>
             </div>
@@ -90,7 +111,7 @@
         </div>
     </aside>
 
-    <!-- HEADER MÓVIL (iPhone & iPad Portrait) -->
+    <!-- HEADER MÓVIL (iPhone & iPad) -->
     <header class="md:hidden bg-slate-900 text-white p-4 sticky top-0 z-30 flex items-center justify-between shadow-md pt-safe">
         <div class="flex items-center space-x-3">
             <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow">
@@ -98,7 +119,9 @@
             </div>
             <div>
                 <h1 class="font-bold text-sm leading-tight">Finanzas</h1>
-                <p id="mobile-user-name" class="text-[10px] text-slate-400">Apple Account</p>
+                <p id="mobile-user-name" class="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Sincronizado
+                </p>
             </div>
         </div>
         <button onclick="openModalTransaction()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1 shadow">
@@ -112,7 +135,7 @@
         <header class="hidden md:flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
             <div>
                 <h2 id="page-title" class="text-2xl font-bold text-slate-800">Resumen General</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Control de finanzas en Apple Ecosystem</p>
+                <p class="text-xs text-slate-500 mt-0.5">Control de finanzas sincronizado en Apple Ecosystem</p>
             </div>
             <button onclick="openModalTransaction()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded-xl shadow-lg shadow-blue-500/20 flex items-center space-x-2 transition">
                 <i class="fa-solid fa-plus"></i>
@@ -120,9 +143,7 @@
             </button>
         </header>
 
-        <div id="alert-container"></div>
-
-        <!-- TAB 1: DASHBOARD -->
+        <!-- DASHBOARD -->
         <section id="tab-dashboard" class="tab-content space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
@@ -151,12 +172,12 @@
             </div>
         </section>
 
-        <!-- TAB 2: TRANSACTIONS -->
+        <!-- TRANSACTIONS -->
         <section id="tab-transactions" class="tab-content hidden space-y-4">
             <div id="mobile-tx-list" class="space-y-3"></div>
         </section>
 
-        <!-- TAB 3: CASHFLOW -->
+        <!-- CASHFLOW -->
         <section id="tab-cashflow" class="tab-content hidden space-y-4">
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
                 <h3 class="font-bold text-slate-800 text-sm mb-3">Flujo de Caja Mensual</h3>
@@ -172,7 +193,7 @@
             </div>
         </section>
 
-        <!-- TAB 4: ACCOUNTS -->
+        <!-- ACCOUNTS -->
         <section id="tab-accounts" class="tab-content hidden space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
@@ -192,7 +213,7 @@
             </div>
         </section>
 
-        <!-- TAB 5: PROFILE -->
+        <!-- PROFILE -->
         <section id="tab-profile" class="tab-content hidden space-y-4">
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <h3 class="font-bold text-slate-800 text-sm border-b pb-2">Perfil de Usuario</h3>
@@ -211,7 +232,7 @@
         </section>
     </main>
 
-    <!-- BARRA NAVEGACIÓN INFERIOR (iPhone / iPad Portrait) -->
+    <!-- NAVEGACIÓN INFERIOR MÓVIL -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 flex justify-around items-center py-2 z-40 pb-safe">
         <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-btn flex flex-col items-center text-blue-500 w-1/5 py-1">
             <i class="fa-solid fa-chart-pie text-base mb-0.5"></i>
@@ -278,25 +299,43 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT COMPLETO E INTEGRADO -->
+    <!-- JAVASCRIPT CON SINCRONIZACIÓN FIREBASE -->
     <script>
         const DEFAULT_CATEGORIES = {
             ingreso: ['Salario', 'Venta de Queso', 'Otros Ingresos'],
             egreso: ['Alquiler', 'Luz', 'Agua', 'Gas', 'Seguro Familiar', 'Deuda Banco Ganadero', 'Deuda Banco Sol', 'Salidas con pareja', 'Gastos bebé', 'Mantenimiento auto', 'Ahorro']
         };
 
-        let categories = JSON.parse(localStorage.getItem('finanzas_categories')) || DEFAULT_CATEGORIES;
-        let transactions = JSON.parse(localStorage.getItem('finanzas_transactions')) || [];
-        let profile = JSON.parse(localStorage.getItem('finanzas_profile')) || { name: 'Usuario Apple', email: 'usuario@icloud.com' };
+        let categories = DEFAULT_CATEGORIES;
+        let transactions = [];
+        let profile = { name: 'Usuario Apple', email: 'usuario@icloud.com' };
 
         let chartExpenses = null, chartIncomeVsExpense = null;
 
         window.onload = function() {
             const inputDate = document.getElementById('tx-date');
             if (inputDate) inputDate.valueAsDate = new Date();
-            renderProfile();
-            renderAll();
+            
+            // Escuchar cambios en tiempo real desde Firebase
+            db.ref('finanzas').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    categories = data.categories || DEFAULT_CATEGORIES;
+                    transactions = data.transactions || [];
+                    profile = data.profile || profile;
+                }
+                renderProfile();
+                renderAll();
+            });
         };
+
+        function syncToFirebase() {
+            db.ref('finanzas').set({
+                categories,
+                transactions,
+                profile
+            });
+        }
 
         function renderAll() {
             updateModalCategories();
@@ -382,9 +421,8 @@
                 transactions.push({ id: Date.now().toString(), type, date, amount, category, note });
             }
 
-            saveToStorage();
+            syncToFirebase();
             closeModalTransaction();
-            renderAll();
         }
 
         function renderTransactions() {
@@ -471,7 +509,7 @@
             tbody.innerHTML = '';
             const months = [0,1,2,3,4,5,6,7,8,9,10,11];
 
-            categories.egreso.forEach(cat => {
+            (categories.egreso || []).forEach(cat => {
                 const tr = document.createElement('tr');
                 let html = `<td class="p-2 font-medium">${cat}</td>`;
                 months.forEach(m => {
@@ -505,9 +543,8 @@
             const name = document.getElementById('cat-name').value.trim();
             if (name && !categories[type].includes(name)) {
                 categories[type].push(name);
-                saveToStorage();
+                syncToFirebase();
                 closeCategoryModal();
-                renderAll();
             }
         }
 
@@ -516,7 +553,7 @@
                 const ul = document.getElementById(`cat-list-${type}`);
                 if (!ul) return;
                 ul.innerHTML = '';
-                categories[type].forEach(cat => {
+                (categories[type] || []).forEach(cat => {
                     const li = document.createElement('li');
                     li.className = 'flex justify-between border-b py-1';
                     li.innerText = cat;
@@ -529,8 +566,7 @@
             e.preventDefault();
             profile.name = document.getElementById('profile-name').value;
             profile.email = document.getElementById('profile-email').value;
-            saveToStorage();
-            renderProfile();
+            syncToFirebase();
         }
 
         function renderProfile() {
@@ -539,16 +575,8 @@
             if (nameElem) nameElem.value = profile.name || '';
             if (emailElem) emailElem.value = profile.email || '';
             
-            const sideName = document.getElementById('sidebar-user-name');
             const mobName = document.getElementById('mobile-user-name');
-            if (sideName) sideName.innerText = profile.name || 'Usuario';
-            if (mobName) mobName.innerText = profile.name || 'Usuario';
-        }
-
-        function saveToStorage() {
-            localStorage.setItem('finanzas_categories', JSON.stringify(categories));
-            localStorage.setItem('finanzas_transactions', JSON.stringify(transactions));
-            localStorage.setItem('finanzas_profile', JSON.stringify(profile));
+            if (mobName) mobName.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ${profile.name || 'Sincronizado'}`;
         }
 
         function exportData() {
@@ -568,8 +596,7 @@
                         categories = data.categories;
                         transactions = data.transactions;
                         profile = data.profile || profile;
-                        saveToStorage();
-                        renderAll();
+                        syncToFirebase();
                     }
                 } catch(err) {
                     alert("Error al procesar el archivo JSON.");
