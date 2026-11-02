@@ -1,1453 +1,608 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroManager - Gestión Agropecuaria Integral</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Finanzas Personales Cloud</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Fonts -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js para gráficos -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <script>
+        // Configuración oficial de Firebase con tus credenciales
+        const firebaseConfig = {
+            apiKey: "AIzaSyABWITpDEGg7cQaOjoycOAWkD6GewzkOn8",
+            authDomain: "misfinanzas-e5157.firebaseapp.com",
+            databaseURL: "https://misfinanzas-e5157-default-rtdb.firebaseio.com",
+            projectId: "misfinanzas-e5157",
+            storageBucket: "misfinanzas-e5157.firebasestorage.app",
+            messagingSenderId: "267467322644",
+            appId: "1:267467322644:web:45d87c95e7cd966a28be01"
+        };
+        
+        // Inicializar Firebase Realtime Database
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        agro: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        },
-                        cacao: {
-                            500: '#854d0e',
-                            700: '#713f12',
-                        }
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { macBg: '#F5F5F7', primary: '#007AFF', success: '#34C759', danger: '#FF3B30' }
                 }
             }
         }
     </script>
     <style>
-        .sidebar-item-active {
-            background-color: #16a34a;
-            color: white;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+        .pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
     </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-800 antialiased min-h-screen flex flex-col md:flex-row">
+<body class="h-full text-slate-800 flex flex-col md:flex-row overflow-x-hidden bg-slate-50">
 
-    <!-- Mobile Header Navigation -->
-    <div class="md:hidden bg-agro-900 text-white p-4 flex justify-between items-center shadow-lg">
-        <div class="flex items-center space-x-2">
-            <i class="fa-solid font-bold fa-tractor text-2xl text-emerald-400"></i>
-            <span class="font-bold text-xl">AgroManager</span>
-        </div>
-        <button id="mobileMenuBtn" class="text-white text-2xl focus:outline-none">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-    </div>
-
-    <!-- Sidebar Navigation -->
-    <aside id="sidebar" class="w-full md:w-64 bg-agro-900 text-white flex-col justify-between hidden md:flex min-h-screen shadow-xl z-20">
+    <!-- SIDEBAR (MacBook & iPad Landscape) -->
+    <aside class="hidden md:flex w-64 bg-slate-900 text-white flex-shrink-0 flex-col justify-between border-r border-slate-800 shadow-xl">
         <div>
-            <!-- Header Brand -->
-            <div class="p-5 border-b border-agro-800 flex items-center space-x-3">
-                <div class="bg-emerald-500 p-2.5 rounded-xl text-agro-900 font-extrabold text-xl">
-                    <i class="fa-solid fa-wheat-awn-circle-exclamation"></i>
+            <div class="p-6 border-b border-slate-800">
+                <div class="flex items-center space-x-2 mb-4">
+                    <span class="w-3 h-3 bg-red-500 rounded-full inline-block"></span>
+                    <span class="w-3 h-3 bg-yellow-500 rounded-full inline-block"></span>
+                    <span class="w-3 h-3 bg-green-500 rounded-full inline-block"></span>
                 </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight">AgroManager</h1>
-                    <p class="text-xs text-emerald-300">Gestión Ganado & Cultivo</p>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg">
+                        <i class="fa-solid fa-wallet text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-base leading-tight">Mis Finanzas</h1>
+                        <p class="text-xs text-emerald-400 flex items-center gap-1 mt-0.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Nube Sincronizada
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Firebase Connection Status Indicator -->
-            <div class="px-5 py-2.5 bg-agro-950/60 flex items-center justify-between text-xs border-b border-agro-800">
-                <span class="flex items-center space-x-2">
-                    <span id="dbStatusDot" class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse"></span>
-                    <span id="dbStatusText" class="text-gray-300">Conectando DB...</span>
-                </span>
-                <i class="fa-solid fa-cloud text-emerald-400"></i>
-            </div>
-
-            <!-- Menu Navigation Links -->
-            <nav class="p-4 space-y-1 text-sm font-medium">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-agro-800 transition duration-150 sidebar-item-active">
+            <nav class="p-4 space-y-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition bg-blue-600 text-white shadow">
                     <i class="fa-solid fa-chart-pie w-5 text-center"></i>
-                    <span>Dashboard General</span>
+                    <span>Dashboard</span>
                 </button>
-                <button onclick="switchTab('ganaderia')" id="nav-ganaderia" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-agro-800 transition duration-150">
-                    <i class="fa-solid fa-cow w-5 text-center"></i>
-                    <span>Ganadería & Lotes</span>
+                <button onclick="switchTab('transactions')" id="nav-transactions" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800">
+                    <i class="fa-solid fa-list-check w-5 text-center"></i>
+                    <span>Transacciones</span>
                 </button>
-                <button onclick="switchTab('agricultura')" id="nav-agricultura" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-agro-800 transition duration-150">
-                    <i class="fa-solid fa-seedling w-5 text-center"></i>
-                    <span>Agricultura & Cultivos</span>
+                <button onclick="switchTab('cashflow')" id="nav-cashflow" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800">
+                    <i class="fa-solid fa-money-bill-trend-up w-5 text-center"></i>
+                    <span>Flujo de Caja</span>
                 </button>
-                <button onclick="switchTab('maquinaria')" id="nav-maquinaria" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-agro-800 transition duration-150">
-                    <i class="fa-solid fa-tractor w-5 text-center"></i>
-                    <span>Maquinaria & Equipos</span>
+                <button onclick="switchTab('accounts')" id="nav-accounts" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800">
+                    <i class="fa-solid fa-folder-tree w-5 text-center"></i>
+                    <span>Plan de Cuentas</span>
                 </button>
-                <button onclick="switchTab('inventario')" id="nav-inventario" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-agro-800 transition duration-150">
-                    <i class="fa-solid fa-boxes-stacked w-5 text-center"></i>
-                    <span>Inventario & Insumos</span>
-                </button>
-                <button onclick="switchTab('finanzas')" id="nav-finanzas" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-agro-800 transition duration-150">
-                    <i class="fa-solid fa-hand-holding-dollar w-5 text-center"></i>
-                    <span>Finanzas Agropecuarias</span>
+                <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800">
+                    <i class="fa-solid fa-user-gear w-5 text-center"></i>
+                    <span>Perfil</span>
                 </button>
             </nav>
         </div>
 
-        <div class="p-4 border-t border-agro-800 text-xs text-center text-emerald-200">
-            <p>© 2026 AgroManager Pro</p>
-            <p class="text-gray-400 mt-1">Conectado a Firebase</p>
+        <div class="p-4 border-t border-slate-800 space-y-2">
+            <button onclick="exportData()" class="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium">
+                <i class="fa-solid fa-download"></i>
+                <span>Exportar Respaldo</span>
+            </button>
+            <label class="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium cursor-pointer">
+                <i class="fa-solid fa-upload"></i>
+                <span>Importar Respaldo</span>
+                <input type="file" onchange="importData(event)" class="hidden" accept=".json">
+            </label>
         </div>
     </aside>
 
-    <!-- Main Content Body -->
-    <main class="flex-1 flex flex-col h-screen overflow-y-auto custom-scrollbar">
-        <!-- Top App Bar -->
-        <header class="bg-white border-b border-gray-200 p-4 px-6 flex justify-between items-center sticky top-0 z-10">
-            <h2 id="pageTitle" class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <i class="fa-solid fa-chart-pie text-agro-600"></i> Dashboard General
-            </h2>
-            <div class="flex items-center space-x-4">
-                <div class="text-right hidden sm:block">
-                    <p class="text-sm font-semibold text-gray-700">Finca / Emprendimiento</p>
-                    <p class="text-xs text-gray-500" id="currentDate">Cargando fecha...</p>
-                </div>
-                <div class="w-10 h-10 rounded-full bg-agro-100 flex items-center justify-center text-agro-700 font-bold border border-agro-300">
-                    <i class="fa-solid fa-user-gear"></i>
-                </div>
+    <!-- HEADER MÓVIL (iPhone & iPad) -->
+    <header class="md:hidden bg-slate-900 text-white p-4 sticky top-0 z-30 flex items-center justify-between shadow-md pt-safe">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow">
+                <i class="fa-solid fa-wallet text-xs"></i>
             </div>
+            <div>
+                <h1 class="font-bold text-sm leading-tight">Finanzas</h1>
+                <p id="mobile-user-name" class="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Sincronizado
+                </p>
+            </div>
+        </div>
+        <button onclick="openModalTransaction()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1 shadow">
+            <i class="fa-solid fa-plus"></i>
+            <span>Nuevo</span>
+        </button>
+    </header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-24 md:pb-8">
+        <header class="hidden md:flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <div>
+                <h2 id="page-title" class="text-2xl font-bold text-slate-800">Resumen General</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Control de finanzas sincronizado en Apple Ecosystem</p>
+            </div>
+            <button onclick="openModalTransaction()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded-xl shadow-lg shadow-blue-500/20 flex items-center space-x-2 transition">
+                <i class="fa-solid fa-plus"></i>
+                <span>Nueva Transacción</span>
+            </button>
         </header>
 
-        <!-- Notification / Alerts Bar -->
-        <div id="statusNotification" class="hidden bg-emerald-50 border-l-4 border-emerald-500 p-4 m-6 mb-0 rounded shadow-sm text-emerald-800 text-sm flex justify-between items-center">
-            <span id="statusNotificationMsg">Operación completada exitosamente.</span>
-            <button onclick="document.getElementById('statusNotification').classList.add('hidden')" class="text-emerald-700 hover:text-emerald-900 font-bold">✕</button>
-        </div>
-
-        <!-- Firebase Firestore Warning Banner (Shows when API is disabled) -->
-        <div id="firebaseApiWarning" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 m-6 mb-0 rounded shadow-sm text-amber-900 text-sm flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-triangle-exclamation text-amber-600 text-xl flex-shrink-0"></i>
-                <div>
-                    <p class="font-bold">Atención: Cloud Firestore no está habilitado en tu proyecto Firebase.</p>
-                    <p class="text-xs text-amber-800 mt-0.5">La aplicación está funcionando en <strong>Modo Local / Demo</strong>. Para sincronizar datos en la nube, debes activar la base de datos Firestore en la consola de Firebase.</p>
+        <!-- DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-[10px] font-bold uppercase text-slate-400">Total Ingresos</p>
+                    <h3 id="dash-total-income" class="text-xl font-extrabold text-emerald-600 mt-1">Bs 0.00</h3>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-[10px] font-bold uppercase text-slate-400">Total Egresos</p>
+                    <h3 id="dash-total-expense" class="text-xl font-extrabold text-rose-600 mt-1">Bs 0.00</h3>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-[10px] font-bold uppercase text-slate-400">Saldo Neto</p>
+                    <h3 id="dash-net-balance" class="text-xl font-extrabold text-blue-600 mt-1">Bs 0.00</h3>
                 </div>
             </div>
-            <a href="https://console.firebase.google.com/project/ganaderia-vv/firestore" target="_blank" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded font-semibold transition flex-shrink-0">Activar en Firebase</a>
-        </div>
 
-        <div class="p-6 space-y-6 flex-1">
-
-            <!-- TAB 1: DASHBOARD GENERAL -->
-            <section id="tab-dashboard" class="tab-content space-y-6">
-                <!-- Metrics Summary Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <!-- Metric 1: Ganado -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Total Ganado</p>
-                                <h3 id="dashTotalGanado" class="text-3xl font-black text-gray-800 mt-1">0</h3>
-                                <p class="text-xs text-emerald-600 mt-1 font-medium"><i class="fa-solid fa-cow mr-1"></i> Cabezas en finca</p>
-                            </div>
-                            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                                <i class="fa-solid fa-cow text-2xl"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Metric 2: Cultivos -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Siembras Activas</p>
-                                <h3 id="dashTotalCultivos" class="text-3xl font-black text-gray-800 mt-1">0</h3>
-                                <p class="text-xs text-amber-600 mt-1 font-medium"><i class="fa-solid fa-vector-square mr-1"></i> Lotes en producción</p>
-                            </div>
-                            <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
-                                <i class="fa-solid fa-seedling text-2xl"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Metric 3: Maquinarias -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Maquinarias</p>
-                                <h3 id="dashTotalMaquinaria" class="text-3xl font-black text-gray-800 mt-1">0</h3>
-                                <p class="text-xs text-blue-600 mt-1 font-medium"><i class="fa-solid fa-wrench mr-1"></i> Equipos operativos</p>
-                            </div>
-                            <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                                <i class="fa-solid fa-tractor text-2xl"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Metric 4: Balance -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Balance Mes</p>
-                                <h3 id="dashBalance" class="text-3xl font-black text-gray-800 mt-1">$0</h3>
-                                <p class="text-xs text-emerald-600 mt-1 font-medium" id="dashBalanceSub">Ingresos - Gastos</p>
-                            </div>
-                            <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                                <i class="fa-solid fa-sack-dollar text-2xl"></i>
-                            </div>
-                        </div>
-                    </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm h-64 flex flex-col justify-between">
+                    <h3 class="font-bold text-slate-800 text-xs">Distribución de Egresos</h3>
+                    <div class="relative h-48"><canvas id="chartExpensesCategory"></canvas></div>
                 </div>
-
-                <!-- Dashboard Charts & Alerts -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Main Chart -->
-                    <div class="lg:col-span-2 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="font-bold text-gray-800 mb-4 flex items-center justify-between">
-                            <span><i class="fa-solid fa-chart-column text-agro-600 mr-2"></i> Balance Financiero Reciente</span>
-                            <span class="text-xs text-gray-400 font-normal">Últimos movimientos</span>
-                        </h4>
-                        <div class="h-64">
-                            <canvas id="financeChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Critical Stock & Maintenance Alerts -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-                        <h4 class="font-bold text-gray-800 mb-4 flex items-center text-red-600">
-                            <i class="fa-solid fa-bell mr-2"></i> Alertas y Recordatorios
-                        </h4>
-                        <div id="alertsList" class="space-y-3 flex-1 overflow-y-auto max-h-64 custom-scrollbar text-sm">
-                            <!-- Dynamic Alerts injected here -->
-                            <div class="p-3 bg-gray-50 text-gray-500 rounded-lg text-center">Cargando alertas del sistema...</div>
-                        </div>
-                    </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm h-64 flex flex-col justify-between">
+                    <h3 class="font-bold text-slate-800 text-xs">Ingresos vs Egresos</h3>
+                    <div class="relative h-48"><canvas id="chartIncomeVsExpense"></canvas></div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- TAB 2: GANADERÍA Y LOTES -->
-            <section id="tab-ganaderia" class="tab-content hidden space-y-6">
-                <!-- Action Header -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200">
+        <!-- TRANSACTIONS -->
+        <section id="tab-transactions" class="tab-content hidden space-y-4">
+            <div id="mobile-tx-list" class="space-y-3"></div>
+        </section>
+
+        <!-- CASHFLOW -->
+        <section id="tab-cashflow" class="tab-content hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+                <h3 class="font-bold text-slate-800 text-sm mb-3">Flujo de Caja Mensual</h3>
+                <table class="w-full text-xs min-w-[600px]">
+                    <thead>
+                        <tr class="bg-slate-900 text-white text-[10px] uppercase">
+                            <th class="p-2 text-left">Categoría</th>
+                            <th class="p-2 text-right">Ene</th><th class="p-2 text-right">Feb</th><th class="p-2 text-right">Mar</th><th class="p-2 text-right">Abr</th><th class="p-2 text-right">May</th><th class="p-2 text-right">Jun</th><th class="p-2 text-right">Jul</th><th class="p-2 text-right">Ago</th><th class="p-2 text-right">Sep</th><th class="p-2 text-right">Oct</th><th class="p-2 text-right">Nov</th><th class="p-2 text-right">Dic</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cashflow-table-body" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ACCOUNTS -->
+        <section id="tab-accounts" class="tab-content hidden space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-slate-800 text-xs">Cuentas Ingreso</h3>
+                        <button onclick="openModalCategory('ingreso')" class="text-xs text-emerald-600 font-bold">+ Agregar</button>
+                    </div>
+                    <ul id="cat-list-ingreso" class="space-y-1 text-xs"></ul>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-slate-800 text-xs">Cuentas Egreso</h3>
+                        <button onclick="openModalCategory('egreso')" class="text-xs text-rose-600 font-bold">+ Agregar</button>
+                    </div>
+                    <ul id="cat-list-egreso" class="space-y-1 text-xs"></ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROFILE -->
+        <section id="tab-profile" class="tab-content hidden space-y-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="font-bold text-slate-800 text-sm border-b pb-2">Perfil de Usuario</h3>
+                <form id="form-profile" onsubmit="saveProfile(event)" class="space-y-3">
                     <div>
-                        <h3 class="font-bold text-gray-800 text-lg">Lotes de Ganado</h3>
-                        <p class="text-xs text-gray-500">Gestión de potreros, razas y seguimiento zootécnico</p>
+                        <label class="text-[10px] font-bold uppercase text-slate-400">Nombre</label>
+                        <input type="text" id="profile-name" required class="w-full bg-slate-50 border rounded-xl p-2 text-xs">
                     </div>
-                    <div class="flex space-x-2">
-                        <button onclick="openModal('modalLoteGanado')" class="bg-agro-600 hover:bg-agro-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition flex items-center gap-2">
-                            <i class="fa-solid fa-plus"></i> Nuevo Lote de Ganado
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Cards Grid - Lotes de Ganado -->
-                <div id="gridLotesGanado" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <!-- Dynamic Grid Items -->
-                </div>
-
-                <!-- Sub-section: Registro de Avances / Bitácora Zootécnica -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="font-bold text-gray-800 flex items-center gap-2">
-                            <i class="fa-solid fa-clipboard-list text-agro-600"></i> Registro de Avances y Eventos Sanitarios
-                        </h4>
-                        <button onclick="openModal('modalAvanceGanado')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-md transition flex items-center gap-1">
-                            <i class="fa-solid fa-plus-circle"></i> Registrar Evento
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-600">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3">Fecha</th>
-                                    <th class="px-4 py-3">Lote</th>
-                                    <th class="px-4 py-3">Tipo Evento</th>
-                                    <th class="px-4 py-3">Detalle / Peso Promed.</th>
-                                    <th class="px-4 py-3">Observaciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyAvancesGanado" class="divide-y divide-gray-100">
-                                <tr><td colspan="5" class="px-4 py-3 text-center text-gray-400">Sin datos registrados</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB 3: AGRICULTURA Y CULTIVOS -->
-            <section id="tab-agricultura" class="tab-content hidden space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200">
                     <div>
-                        <h3 class="font-bold text-gray-800 text-lg">Parcelas y Cultivos</h3>
-                        <p class="text-xs text-gray-500">Planificación de siembras, cosechas y rendimiento</p>
+                        <label class="text-[10px] font-bold uppercase text-slate-400">Correo</label>
+                        <input type="email" id="profile-email" required class="w-full bg-slate-50 border rounded-xl p-2 text-xs">
                     </div>
-                    <button onclick="openModal('modalCultivo')" class="bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Registrar Nueva Parcela
-                    </button>
-                </div>
-
-                <!-- Parcelas Container -->
-                <div id="gridCultivos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <!-- Dynamic List -->
-                </div>
-
-                <!-- Sub-section: Labores Agrícolas -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="font-bold text-gray-800 flex items-center gap-2">
-                            <i class="fa-solid fa-person-digging text-amber-600"></i> Bitácora de Labores Agrícolas
-                        </h4>
-                        <button onclick="openModal('modalLabor')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-md transition flex items-center gap-1">
-                            <i class="fa-solid fa-plus-circle"></i> Registrar Labor
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-600">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3">Fecha</th>
-                                    <th class="px-4 py-3">Cultivo / Parcela</th>
-                                    <th class="px-4 py-3">Labor (Fumigación/Riego/Cosecha)</th>
-                                    <th class="px-4 py-3">Insumos Utilizados</th>
-                                    <th class="px-4 py-3">Rendimiento (Si aplica)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyLabores" class="divide-y divide-gray-100">
-                                <tr><td colspan="5" class="px-4 py-3 text-center text-gray-400">Cargando labores...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB 4: MAQUINARIA Y EQUIPOS -->
-            <section id="tab-maquinaria" class="tab-content hidden space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200">
-                    <div>
-                        <h3 class="font-bold text-gray-800 text-lg">Parque Automotor y Equipos</h3>
-                        <p class="text-xs text-gray-500">Tractores, implementos y mantenimiento preventivo</p>
-                    </div>
-                    <button onclick="openModal('modalMaquinaria')" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Registrar Equipo
-                    </button>
-                </div>
-
-                <div id="gridMaquinaria" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <!-- Dynamic Maquinaria Cards -->
-                </div>
-
-                <!-- Bitácora Mantenimiento -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="font-bold text-gray-800 flex items-center gap-2">
-                            <i class="fa-solid fa-wrench text-blue-600"></i> Historial de Mantenimientos y Services
-                        </h4>
-                        <button onclick="openModal('modalMantenimiento')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-md transition flex items-center gap-1">
-                            <i class="fa-solid fa-plus-circle"></i> Nuevo Mantenimiento
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-600">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3">Fecha</th>
-                                    <th class="px-4 py-3">Equipo</th>
-                                    <th class="px-4 py-3">Tipo Mantenimiento</th>
-                                    <th class="px-4 py-3">Costo ($)</th>
-                                    <th class="px-4 py-3">Próximo Service</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyMantenimientos" class="divide-y divide-gray-100">
-                                <tr><td colspan="5" class="px-4 py-3 text-center text-gray-400">Sin registros de service</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB 5: INVENTARIO E INSUMOS -->
-            <section id="tab-inventario" class="tab-content hidden space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200">
-                    <div>
-                        <h3 class="font-bold text-gray-800 text-lg">Inventario de Insumos</h3>
-                        <p class="text-xs text-gray-500">Semillas, agroquímicos, vacunas, repuestos y combustibles</p>
-                    </div>
-                    <button onclick="openModal('modalInsumo')" class="bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Nuevo Insumo
-                    </button>
-                </div>
-
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-600">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3">Producto / Insumo</th>
-                                    <th class="px-4 py-3">Categoría</th>
-                                    <th class="px-4 py-3">Stock Actual</th>
-                                    <th class="px-4 py-3">Mínimo Crítico</th>
-                                    <th class="px-4 py-3">Unidad</th>
-                                    <th class="px-4 py-3 text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyInventario" class="divide-y divide-gray-100">
-                                <tr><td colspan="6" class="px-4 py-3 text-center text-gray-400">Cargando datos de inventario...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB 6: FINANZAS Y REGISTRO ECONÓMICO -->
-            <section id="tab-finanzas" class="tab-content hidden space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200">
-                    <div>
-                        <h3 class="font-bold text-gray-800 text-lg">Finanzas y Flujo de Caja</h3>
-                        <p class="text-xs text-gray-500">Ventas de producción, gastos operacionales y compras</p>
-                    </div>
-                    <button onclick="openModal('modalTransaccion')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Nueva Transacción
-                    </button>
-                </div>
-
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-600">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3">Fecha</th>
-                                    <th class="px-4 py-3">Tipo</th>
-                                    <th class="px-4 py-3">Categoría</th>
-                                    <th class="px-4 py-3">Descripción</th>
-                                    <th class="px-4 py-3 text-right">Monto ($)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyFinanzas" class="divide-y divide-gray-100">
-                                <tr><td colspan="5" class="px-4 py-3 text-center text-gray-400">Sin movimientos financieros</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-medium p-2.5 rounded-xl text-xs">Guardar Cambios</button>
+                </form>
+            </div>
+        </section>
     </main>
 
-    <!-- MODALES DE REGISTRO / EDICIÓN -->
+    <!-- NAVEGACIÓN INFERIOR MÓVIL -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 flex justify-around items-center py-2 z-40 pb-safe">
+        <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-btn flex flex-col items-center text-blue-500 w-1/5 py-1">
+            <i class="fa-solid fa-chart-pie text-base mb-0.5"></i>
+            <span class="text-[9px]">Dashboard</span>
+        </button>
+        <button onclick="switchTab('transactions')" id="mob-nav-transactions" class="mob-btn flex flex-col items-center text-slate-400 w-1/5 py-1">
+            <i class="fa-solid fa-list-check text-base mb-0.5"></i>
+            <span class="text-[9px]">Movimientos</span>
+        </button>
+        <button onclick="switchTab('cashflow')" id="mob-nav-cashflow" class="mob-btn flex flex-col items-center text-slate-400 w-1/5 py-1">
+            <i class="fa-solid fa-money-bill-trend-up text-base mb-0.5"></i>
+            <span class="text-[9px]">Flujo</span>
+        </button>
+        <button onclick="switchTab('accounts')" id="mob-nav-accounts" class="mob-btn flex flex-col items-center text-slate-400 w-1/5 py-1">
+            <i class="fa-solid fa-folder-tree text-base mb-0.5"></i>
+            <span class="text-[9px]">Cuentas</span>
+        </button>
+        <button onclick="switchTab('profile')" id="mob-nav-profile" class="mob-btn flex flex-col items-center text-slate-400 w-1/5 py-1">
+            <i class="fa-solid fa-user-gear text-base mb-0.5"></i>
+            <span class="text-[9px]">Perfil</span>
+        </button>
+    </nav>
 
-    <!-- Modal 1: Lote Ganado -->
-    <div id="modalLoteGanado" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Registrar Lote de Ganado</h3>
-            <form id="formLoteGanado" onsubmit="handleSaveLoteGanado(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre / Número de Lote</label>
-                    <input type="text" id="loteNombre" required placeholder="Ej: Lote Vacas Engorde 01" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-agro-500 outline-none">
+    <!-- MODAL NUEVA TRANSACCIÓN -->
+    <div id="modal-tx" class="fixed inset-0 bg-slate-900/60 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
+        <div class="bg-white rounded-t-3xl sm:rounded-2xl w-full max-w-md p-4 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-slate-800 text-sm">Registrar Movimiento</h3>
+                <button onclick="closeModalTransaction()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-tx" onsubmit="saveTransaction(event)" class="space-y-3">
+                <input type="hidden" id="tx-id">
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="cursor-pointer text-center border rounded-xl p-2 text-xs">
+                        <input type="radio" name="tx-type" value="ingreso" checked onchange="updateModalCategories()"> Ingreso
+                    </label>
+                    <label class="cursor-pointer text-center border rounded-xl p-2 text-xs">
+                        <input type="radio" name="tx-type" value="egreso" onchange="updateModalCategories()"> Egreso
+                    </label>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Cabezas (Cantidad)</label>
-                        <input type="number" id="loteCantidad" required min="1" placeholder="50" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-agro-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Raza Principal</label>
-                        <input type="text" id="loteRaza" required placeholder="Ej: Brahman / Angus" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-agro-500 outline-none">
-                    </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="date" id="tx-date" required class="border rounded-xl p-2 text-xs">
+                    <input type="number" step="0.01" id="tx-amount" placeholder="Monto" required class="border rounded-xl p-2 text-xs">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Propósito</label>
-                        <select id="loteProposito" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-agro-500 outline-none">
-                            <option value="Carne">Engorde / Carne</option>
-                            <option value="Leche">Producción de Leche</option>
-                            <option value="Doble Propósito">Doble Propósito</option>
-                            <option value="Cria">Cría / Reproducción</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Ubicación / Potrero</label>
-                        <input type="text" id="loteUbicacion" required placeholder="Potrero El Potrero Norte" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-agro-500 outline-none">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3 border-t">
-                    <button type="button" onclick="closeModal('modalLoteGanado')" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-agro-600 text-white text-sm font-semibold rounded-lg hover:bg-agro-700">Guardar Lote</button>
+                <select id="tx-category" required class="w-full border rounded-xl p-2 text-xs"></select>
+                <input type="text" id="tx-note" placeholder="Observación" class="w-full border rounded-xl p-2 text-xs">
+                <button type="submit" class="w-full bg-blue-600 text-white rounded-xl p-2.5 text-xs font-bold">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CATEGORÍA -->
+    <div id="modal-cat" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-4 space-y-3">
+            <h3 class="font-bold text-slate-800 text-sm">Nueva Cuenta</h3>
+            <form onsubmit="saveCategory(event)" class="space-y-3">
+                <input type="hidden" id="cat-type">
+                <input type="text" id="cat-name" placeholder="Nombre" required class="w-full border rounded-xl p-2 text-xs">
+                <div class="flex space-x-2">
+                    <button type="button" onclick="closeCategoryModal()" class="w-1/2 border rounded-xl p-2 text-xs">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-blue-600 text-white rounded-xl p-2 text-xs font-bold">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal 2: Avance Ganado -->
-    <div id="modalAvanceGanado" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Registrar Evento Zootécnico</h3>
-            <form id="formAvanceGanado" onsubmit="handleSaveAvanceGanado(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Lote Ganado</label>
-                    <select id="avanceLoteSelect" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-agro-500 outline-none">
-                        <!-- Dynamic options -->
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Evento</label>
-                    <select id="avanceTipo" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-agro-500 outline-none">
-                        <option value="Pesaje">Pesaje Promedio</option>
-                        <option value="Vacunacion">Vacunación / Desparasitante</option>
-                        <option value="Tratamiento">Tratamiento Médico</option>
-                        <option value="Partos">Nacimientos / Partos</option>
-                        <option value="Mortalidad">Mortalidad / Baja</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Detalle / Peso Promedio (Kg)</label>
-                    <input type="text" id="avanceDetalle" required placeholder="Ej: 380 Kg promed. o Vacuna Aftosa" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-agro-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Observaciones / Notas</label>
-                    <textarea id="avanceNotas" rows="2" placeholder="Notas adicionales..." class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-agro-500 outline-none"></textarea>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3 border-t">
-                    <button type="button" onclick="closeModal('modalAvanceGanado')" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-agro-600 text-white text-sm font-semibold rounded-lg hover:bg-agro-700">Guardar Avance</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal 3: Cultivo / Parcela -->
-    <div id="modalCultivo" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Registrar Parcela de Cultivo</h3>
-            <form id="formCultivo" onsubmit="handleSaveCultivo(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre Parcela / Lote</label>
-                    <input type="text" id="cultivoNombre" required placeholder="Ej: Parcela Maíz Híbrido 02" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Cultivo</label>
-                        <input type="text" id="cultivoTipo" required placeholder="Ej: Maíz, Soya, Café" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Área (Hectáreas)</label>
-                        <input type="number" step="0.1" id="cultivoArea" required placeholder="12.5" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Fecha Siembra</label>
-                        <input type="date" id="cultivoFechaSiembra" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Est. Cosecha</label>
-                        <input type="date" id="cultivoFechaEst" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3 border-t">
-                    <button type="button" onclick="closeModal('modalCultivo')" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-amber-600 text-white text-sm font-semibold rounded-lg hover:bg-amber-700">Guardar Parcela</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal 4: Labor Agrícola -->
-    <div id="modalLabor" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Registrar Labor Agrícola</h3>
-            <form id="formLabor" onsubmit="handleSaveLabor(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Seleccionar Cultivo</label>
-                    <select id="laborCultivoSelect" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Labor Realizada</label>
-                    <select id="laborTipo" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                        <option value="Fumigación">Fumigación / Control Plagas</option>
-                        <option value="Fertilización">Fertilización</option>
-                        <option value="Riego">Riego / Mantenimiento Canal</option>
-                        <option value="Deshierbe">Deshierbe / Control Malezas</option>
-                        <option value="Cosecha">Cosecha y Recolección</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Insumos Utilizados</label>
-                    <input type="text" id="laborInsumos" placeholder="Ej: 50Kg UREA, Glyphosato 5L" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Rendimiento Cosecha (Ton/Ha o sacos)</label>
-                    <input type="text" id="laborRendimiento" placeholder="Ej: 4.5 Ton/Ha (Solo si es cosecha)" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div class="flex justify-end space-x-2 pt-3 border-t">
-                    <button type="button" onclick="closeModal('modalLabor')" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-amber-600 text-white text-sm font-semibold rounded-lg hover:bg-amber-700">Guardar Labor</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal 5: Maquinaria -->
-    <div id="modalMaquinaria" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Registrar Maquinaria / Equipo</h3>
-            <form id="formMaquinaria" onsubmit="handleSaveMaquinaria(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre / Nombre Equipo</label>
-                    <input type="text" id="maqNombre" required placeholder="Ej: Tractor John Deere 6110M" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Marca / Modelo</label>
-                        <input type="text" id="maqModelo" required placeholder="JD 2021" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Horómetro / Km</label>
-                        <input type="number" id="maqHoras" required placeholder="1250" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Estado</label>
-                        <select id="maqEstado" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="Operativo">Operativo</option>
-                            <option value="Mantenimiento">En Mantenimiento</option>
-                            <option value="Reparacion">Requiere Reparación</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Combustible</label>
-                        <select id="maqCombustible" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="Diesel">Diesel</option>
-                            <option value="Gasolina">Gasolina</option>
-                            <option value="Electrico/N/A">Eléctrico / Sin Motor</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3 border-t">
-                    <button type="button" onclick="closeModal('modalMaquinaria')" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700">Guardar Equipo</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal 6: Mantenimiento Maquinaria -->
-    <div id="modalMantenimiento" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Registrar Mantenimiento de Maquinaria</h3>
-            <form id="formMantenimiento" onsubmit="handleSaveMantenimiento(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Seleccionar Equipo</label>
-                    <select id="mantEquipoSelect" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </select>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tipo Service</label>
-                        <select id="mantTipo" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="Preventivo">Preventivo</option>
-                            <option value="Correctivo">Correctivo / Reparación</option>
-                            <option value="Cambio Aceite">Cambio de Aceite/Filtros</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Costo ($)</label>
-                        <input type="number" step="0.01" id="mantCosto" required placeholder="150.00" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Próximo Service (Fecha estimada)</label>
-                    <input type="date" id="mantProxFecha" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div class="flex justify-end space-x-2 pt-3 border-t">
-                    <button type="button" onclick="closeModal('modalMantenimiento')" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700">Guardar Mantenimiento</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal 7: Insumo / Inventario -->
-    <div id="modalInsumo" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Agregar Producto a Inventario</h3>
-            <form id="formInsumo" onsubmit="handleSaveInsumo(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre Insumo / Producto</label>
-                    <input type="text" id="insumoNombre" required placeholder="Ej: Fertilizante NPK 15-15-15" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Categoría</label>
-                        <select id="insumoCategoria" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                            <option value="Agrícola">Agrícola (Semillas/Abono)</option>
-                            <option value="Veterinario">Veterinario (Vacunas/Medicamentos)</option>
-                            <option value="Alimento">Alimento Ganado / Forraje</option>
-                            <option value="Combustible">Combustibles / Aceites</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Unidad de Medida</label>
-                        <input type="text" id="insumoUnidad" required placeholder="Bolsas 50kg, Litros, Dosis" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Stock Inicial</label>
-                        <input type="number" id="insumoStock" required min="0" placeholder="100" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Stock Mínimo Alerta</label>
-                        <input type="number" id="insumoMinimo" required min="1" placeholder="15" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3 border-t">
-                    <button type="button" onclick="closeModal('modalInsumo')" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700">Guardar Insumo</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal 8: Transacción Financiera -->
-    <div id="modalTransaccion" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Registrar Movimiento Financiero</h3>
-            <form id="formTransaccion" onsubmit="handleSaveTransaccion(event)" class="space-y-3">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Movimiento</label>
-                        <select id="transTipo" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                            <option value="Ingreso">Ingreso (+)</option>
-                            <option value="Gasto">Gasto (-)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Monto ($)</label>
-                        <input type="number" step="0.01" id="transMonto" required placeholder="500.00" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Categoría</label>
-                    <select id="transCategoria" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                        <option value="Venta Ganado">Venta de Ganado</option>
-                        <option value="Venta Leche">Venta de Leche</option>
-                        <option value="Venta Cosecha">Venta de Cosecha / Grano</option>
-                        <option value="Insumos / Semillas">Compra de Insumos/Semillas</option>
-                        <option value="Mantenimiento">Mantenimiento Maquinaria</option>
-                        <option value="Salarios / Mano de obra">Salarios / Mano de Obra</option>
-                        <option value="Otros">Otros Ingresos / Gastos</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción / Concepto</label>
-                    <input type="text" id="transDescripcion" required placeholder="Ej: Venta de 5 novillos de engorde" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-                <div class="flex justify-end space-x-2 pt-3 border-t">
-                    <button type="button" onclick="closeModal('modalTransaccion')" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700">Guardar Movimiento</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
-    <!-- FIREBASE AND CLIENT SCRIPT LOGIC -->
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getFirestore, 
-            collection, 
-            addDoc, 
-            getDocs, 
-            onSnapshot, 
-            doc, 
-            deleteDoc, 
-            updateDoc, 
-            query 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // Configuration provided by user
-        const firebaseConfig = {
-            apiKey: "AIzaSyCg8A6JFLPQr0PykaFKsJZkmp6YFjxo66A",
-            authDomain: "ganaderia-vv.firebaseapp.com",
-            projectId: "ganaderia-vv",
-            storageBucket: "ganaderia-vv.firebasestorage.app",
-            messagingSenderId: "897110713954",
-            appId: "1:897110713954:web:188dda5e64b4803376533b"
+    <!-- JAVASCRIPT CON SINCRONIZACIÓN FIREBASE -->
+    <script>
+        const DEFAULT_CATEGORIES = {
+            ingreso: ['Salario', 'Venta de Queso', 'Otros Ingresos'],
+            egreso: ['Alquiler', 'Luz', 'Agua', 'Gas', 'Seguro Familiar', 'Deuda Banco Ganadero', 'Deuda Banco Sol', 'Salidas con pareja', 'Gastos bebé', 'Mantenimiento auto', 'Ahorro']
         };
 
-        // Initialize Firebase
-        let app, db;
-        let isFirebaseConnected = false;
+        let categories = DEFAULT_CATEGORIES;
+        let transactions = [];
+        let profile = { name: 'Usuario Apple', email: 'usuario@icloud.com' };
 
-        // Application Local State (Acts as cache or fallback if Firestore offline)
-        const state = {
-            lotesGanado: [],
-            avancesGanado: [],
-            cultivos: [],
-            labores: [],
-            maquinaria: [],
-            mantenimientos: [],
-            inventario: [],
-            finanzas: []
-        };
+        let chartExpenses = null, chartIncomeVsExpense = null;
 
-        // Global Chart Instance
-        let chartInstance = null;
-
-        // Initialize Application
-        window.addEventListener('load', () => {
-            document.getElementById('currentDate').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        window.onload = function() {
+            const inputDate = document.getElementById('tx-date');
+            if (inputDate) inputDate.valueAsDate = new Date();
             
-            // Toggle sidebar for mobile
-            document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-                const sidebar = document.getElementById('sidebar');
-                sidebar.classList.toggle('hidden');
+            // Escuchar cambios en tiempo real desde Firebase
+            db.ref('finanzas').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    categories = data.categories || DEFAULT_CATEGORIES;
+                    transactions = data.transactions || [];
+                    profile = data.profile || profile;
+                }
+                renderProfile();
+                renderAll();
+            });
+        };
+
+        function syncToFirebase() {
+            db.ref('finanzas').set({
+                categories,
+                transactions,
+                profile
+            });
+        }
+
+        function renderAll() {
+            updateModalCategories();
+            renderPlanOfAccounts();
+            renderTransactions();
+            renderDashboard();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-blue-600', 'text-white'));
+            document.querySelectorAll('.mob-btn').forEach(btn => {
+                btn.classList.remove('text-blue-500');
+                btn.classList.add('text-slate-400');
             });
 
-            initFirebase();
-        });
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.remove('hidden');
 
-        function initFirebase() {
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                
-                // Setup Realtime Listeners for Firestore Collections
-                setupRealtimeListeners();
-            } catch (error) {
-                console.warn("Firebase initialization issue, falling back to local storage", error);
-                enableLocalFallback("Error de conexión Firebase");
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) activeNav.classList.add('bg-blue-600', 'text-white');
+
+            const activeMob = document.getElementById(`mob-nav-${tabId}`);
+            if (activeMob) {
+                activeMob.classList.add('text-blue-500');
+                activeMob.classList.remove('text-slate-400');
+            }
+
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'cashflow') renderCashFlow();
+        }
+
+        function updateModalCategories() {
+            const txTypeElem = document.querySelector('input[name="tx-type"]:checked');
+            if (!txTypeElem) return;
+            
+            const txType = txTypeElem.value;
+            const categorySelect = document.getElementById('tx-category');
+            if (!categorySelect) return;
+
+            categorySelect.innerHTML = '';
+            (categories[txType] || []).forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                categorySelect.appendChild(opt);
+            });
+        }
+
+        function openModalTransaction() {
+            const form = document.getElementById('form-tx');
+            if (form) form.reset();
+            
+            const idElem = document.getElementById('tx-id');
+            if (idElem) idElem.value = '';
+            
+            const dateElem = document.getElementById('tx-date');
+            if (dateElem) dateElem.valueAsDate = new Date();
+
+            updateModalCategories();
+            const modal = document.getElementById('modal-tx');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeModalTransaction() {
+            const modal = document.getElementById('modal-tx');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function saveTransaction(e) {
+            e.preventDefault();
+            const id = document.getElementById('tx-id').value;
+            const type = document.querySelector('input[name="tx-type"]:checked').value;
+            const date = document.getElementById('tx-date').value;
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-category').value;
+            const note = document.getElementById('tx-note').value.trim();
+
+            if (id) {
+                const idx = transactions.findIndex(t => t.id === id);
+                if (idx !== -1) transactions[idx] = { id, type, date, amount, category, note };
+            } else {
+                transactions.push({ id: Date.now().toString(), type, date, amount, category, note });
+            }
+
+            syncToFirebase();
+            closeModalTransaction();
+        }
+
+        function renderTransactions() {
+            const list = document.getElementById('mobile-tx-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            transactions.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
+                const isIncome = t.type === 'ingreso';
+                const card = document.createElement('div');
+                card.className = 'bg-white p-3.5 rounded-xl border flex justify-between items-center text-xs shadow-xs';
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-slate-800">${t.category}</p>
+                        <p class="text-[10px] text-slate-400">${t.date} ${t.note ? '• ' + t.note : ''}</p>
+                    </div>
+                    <div class="text-right font-extrabold ${isIncome ? 'text-emerald-600' : 'text-rose-600'}">
+                        ${isIncome ? '+' : '-'} Bs ${t.amount.toFixed(2)}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function renderDashboard() {
+            let totalIncome = 0, totalExpense = 0;
+            const expByCat = {};
+
+            transactions.forEach(t => {
+                if (t.type === 'ingreso') totalIncome += t.amount;
+                else {
+                    totalExpense += t.amount;
+                    expByCat[t.category] = (expByCat[t.category] || 0) + t.amount;
+                }
+            });
+
+            const incElem = document.getElementById('dash-total-income');
+            const expElem = document.getElementById('dash-total-expense');
+            const netElem = document.getElementById('dash-net-balance');
+
+            if (incElem) incElem.innerText = `Bs ${totalIncome.toFixed(2)}`;
+            if (expElem) expElem.innerText = `Bs ${totalExpense.toFixed(2)}`;
+            if (netElem) netElem.innerText = `Bs ${(totalIncome - totalExpense).toFixed(2)}`;
+
+            renderCharts(expByCat, totalIncome, totalExpense);
+        }
+
+        function renderCharts(expByCat, totalIncome, totalExpense) {
+            const ctxExpElem = document.getElementById('chartExpensesCategory');
+            if (ctxExpElem) {
+                const ctxExp = ctxExpElem.getContext('2d');
+                if (chartExpenses) chartExpenses.destroy();
+                chartExpenses = new Chart(ctxExp, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(expByCat).length ? Object.keys(expByCat) : ['Sin datos'],
+                        datasets: [{ 
+                            data: Object.values(expByCat).length ? Object.values(expByCat) : [1], 
+                            backgroundColor: ['#007AFF','#34C759','#FF9500','#FF3B30','#AF52DE','#5856D6'] 
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            const ctxBarElem = document.getElementById('chartIncomeVsExpense');
+            if (ctxBarElem) {
+                const ctxBar = ctxBarElem.getContext('2d');
+                if (chartIncomeVsExpense) chartIncomeVsExpense.destroy();
+                chartIncomeVsExpense = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Ingresos', 'Egresos'],
+                        datasets: [{ data: [totalIncome, totalExpense], backgroundColor: ['#34C759', '#FF3B30'] }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
             }
         }
 
-        function enableLocalFallback(reasonMessage = "Modo Local / Demo") {
-            isFirebaseConnected = false;
-            document.getElementById('dbStatusDot').className = "w-2.5 h-2.5 rounded-full bg-orange-400";
-            document.getElementById('dbStatusText').innerText = reasonMessage;
-            document.getElementById('firebaseApiWarning').classList.remove('hidden');
-            loadDemoData();
+        function renderCashFlow() {
+            const tbody = document.getElementById('cashflow-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const months = [0,1,2,3,4,5,6,7,8,9,10,11];
+
+            (categories.egreso || []).forEach(cat => {
+                const tr = document.createElement('tr');
+                let html = `<td class="p-2 font-medium">${cat}</td>`;
+                months.forEach(m => {
+                    const sum = transactions
+                        .filter(t => t.type === 'egreso' && t.category === cat && new Date(t.date).getMonth() === m)
+                        .reduce((a,b) => a + b.amount, 0);
+                    html += `<td class="p-2 text-right font-mono">${sum > 0 ? sum.toFixed(0) : '-'}</td>`;
+                });
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
+            });
         }
 
-        // Realtime Firestore Sync
-        function setupRealtimeListeners() {
-            const collections = ['lotesGanado', 'avancesGanado', 'cultivos', 'labores', 'maquinaria', 'mantenimientos', 'inventario', 'finanzas'];
-            let hasErrorHandled = false;
+        function openModalCategory(type) {
+            const typeElem = document.getElementById('cat-type');
+            const nameElem = document.getElementById('cat-name');
+            if (typeElem) typeElem.value = type;
+            if (nameElem) nameElem.value = '';
+            const modal = document.getElementById('modal-cat');
+            if (modal) modal.classList.remove('hidden');
+        }
 
-            collections.forEach(colName => {
-                const q = query(collection(db, colName));
-                onSnapshot(q, (snapshot) => {
-                    // Successful Firestore connection confirmed
-                    if (!isFirebaseConnected && !hasErrorHandled) {
-                        isFirebaseConnected = true;
-                        document.getElementById('dbStatusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
-                        document.getElementById('dbStatusText').innerText = "Firebase Conectado";
-                        document.getElementById('firebaseApiWarning').classList.add('hidden');
-                    }
+        function closeCategoryModal() { 
+            const modal = document.getElementById('modal-cat');
+            if (modal) modal.classList.add('hidden'); 
+        }
 
-                    const data = [];
-                    snapshot.forEach((docSnap) => {
-                        data.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-                    state[colName] = data;
-                    renderUI();
-                }, (err) => {
-                    console.warn(`Firestore Error en '${colName}':`, err.code || err.message);
-                    if (!hasErrorHandled) {
-                        hasErrorHandled = true;
-                        enableLocalFallback("Modo Local / Demo");
-                    }
+        function saveCategory(e) {
+            e.preventDefault();
+            const type = document.getElementById('cat-type').value;
+            const name = document.getElementById('cat-name').value.trim();
+            if (name && !categories[type].includes(name)) {
+                categories[type].push(name);
+                syncToFirebase();
+                closeCategoryModal();
+            }
+        }
+
+        function renderPlanOfAccounts() {
+            ['ingreso', 'egreso'].forEach(type => {
+                const ul = document.getElementById(`cat-list-${type}`);
+                if (!ul) return;
+                ul.innerHTML = '';
+                (categories[type] || []).forEach(cat => {
+                    const li = document.createElement('li');
+                    li.className = 'flex justify-between border-b py-1';
+                    li.innerText = cat;
+                    ul.appendChild(li);
                 });
             });
         }
 
-        function loadDemoData() {
-            // Sample demo data in case Firestore API is not activated yet
-            if (state.lotesGanado.length === 0) {
-                state.lotesGanado = [
-                    { id: '1', nombre: 'Lote Engorde 01', cantidad: 45, raza: 'Brahman', proposito: 'Carne', ubicacion: 'Potrero Norte' },
-                    { id: '2', nombre: 'Lote Lechería A', cantidad: 22, raza: 'Girolando', proposito: 'Leche', ubicacion: 'Potrero Este' }
-                ];
-            }
-            if (state.cultivos.length === 0) {
-                state.cultivos = [
-                    { id: '1', nombre: 'Parcela Maíz 1', tipo: 'Maíz Híbrido', area: 15, fechaSiembra: '2026-01-10', fechaEst: '2026-05-15' },
-                    { id: '2', nombre: 'Lote Soya Verano', tipo: 'Soya', area: 30, fechaSiembra: '2026-02-01', fechaEst: '2026-06-20' }
-                ];
-            }
-            if (state.maquinaria.length === 0) {
-                state.maquinaria = [
-                    { id: '1', nombre: 'Tractor John Deere', modelo: '6110M', horas: 1420, estado: 'Operativo', combustible: 'Diesel' },
-                    { id: '2', nombre: 'Sembradora Directa', modelo: 'Semeato', horas: 320, estado: 'Mantenimiento', combustible: 'Electrico/N/A' }
-                ];
-            }
-            if (state.inventario.length === 0) {
-                state.inventario = [
-                    { id: '1', nombre: 'Fertilizante NPK 15-15-15', categoria: 'Agrícola', stock: 8, minimo: 10, unidad: 'Sacos 50kg' },
-                    { id: '2', nombre: 'Vacuna Aftosa', categoria: 'Veterinario', stock: 150, minimo: 30, unidad: 'Dosis' }
-                ];
-            }
-            if (state.finanzas.length === 0) {
-                state.finanzas = [
-                    { id: '1', fecha: '2026-03-01', tipo: 'Ingreso', categoria: 'Venta Ganado', descripcion: 'Venta de 5 novillos', monto: 4500 },
-                    { id: '2', fecha: '2026-03-05', tipo: 'Gasto', categoria: 'Insumos / Semillas', descripcion: 'Compra fertilizantes', monto: 1200 }
-                ];
-            }
-            renderUI();
+        function saveProfile(e) {
+            e.preventDefault();
+            profile.name = document.getElementById('profile-name').value;
+            profile.email = document.getElementById('profile-email').value;
+            syncToFirebase();
         }
 
-        // Generic Helper to save data (Firestore + local state fallback)
-        async function saveData(colName, itemData) {
-            // Clean undefined values
-            Object.keys(itemData).forEach(key => itemData[key] === undefined && delete itemData[key]);
+        function renderProfile() {
+            const nameElem = document.getElementById('profile-name');
+            const emailElem = document.getElementById('profile-email');
+            if (nameElem) nameElem.value = profile.name || '';
+            if (emailElem) emailElem.value = profile.email || '';
+            
+            const mobName = document.getElementById('mobile-user-name');
+            if (mobName) mobName.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ${profile.name || 'Sincronizado'}`;
+        }
 
-            if (isFirebaseConnected && db) {
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ categories, transactions, profile }));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `Backup_Finanzas.json`;
+            a.click();
+        }
+
+        function importData(e) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
                 try {
-                    await addDoc(collection(db, colName), itemData);
-                    showNotification("Registro guardado en Firebase exitosamente.");
-                    return;
-                } catch (e) {
-                    console.error("Error guardando en Firebase: ", e);
-                    showNotification("⚠️ Error Firebase: Verifique las Reglas de Firestore (" + e.message + ")");
-                    // Save locally as backup
-                    const newItem = { id: Date.now().toString(), ...itemData };
-                    state[colName].push(newItem);
-                    renderUI();
-                    return;
-                }
-            }
-            // Fallback: save to local state
-            const newItem = { id: Date.now().toString(), ...itemData };
-            state[colName].push(newItem);
-            showNotification("Registro guardado en almacenamiento local.");
-            renderUI();
-        }
-
-        // Generic Helper to delete data
-        async function deleteItem(colName, id) {
-            if (isFirebaseConnected && db) {
-                try {
-                    await deleteDoc(doc(db, colName, id));
-                    showNotification("Registro eliminado de Firebase.");
-                    return;
-                } catch (e) {
-                    console.error("Error al eliminar: ", e);
-                    showNotification("⚠️ Error al eliminar en Firebase: " + e.message);
-                }
-            }
-            state[colName] = state[colName].filter(item => item.id !== id);
-            showNotification("Registro eliminado.");
-            renderUI();
-        }
-
-        // Notification toast
-        function showNotification(msg) {
-            const notif = document.getElementById('statusNotification');
-            const notifMsg = document.getElementById('statusNotificationMsg');
-            notifMsg.innerText = msg;
-            notif.classList.remove('hidden');
-            setTimeout(() => {
-                notif.classList.add('hidden');
-            }, 4000);
-        }
-
-        // Navigation Switcher
-        window.switchTab = function(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('sidebar-item-active'));
-            
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            const navBtn = document.getElementById(`nav-${tabName}`);
-            if (navBtn) navBtn.classList.add('sidebar-item-active');
-
-            // Set Title Header
-            const titles = {
-                dashboard: '<i class="fa-solid fa-chart-pie text-agro-600"></i> Dashboard General',
-                ganaderia: '<i class="fa-solid fa-cow text-agro-600"></i> Gestión de Ganadería & Lotes',
-                agricultura: '<i class="fa-solid fa-seedling text-amber-600"></i> Gestión Agrícola & Cultivos',
-                maquinaria: '<i class="fa-solid fa-tractor text-blue-600"></i> Maquinaria & Equipos',
-                inventario: '<i class="fa-solid fa-boxes-stacked text-purple-600"></i> Inventario & Insumos',
-                finanzas: '<i class="fa-solid fa-hand-holding-dollar text-emerald-600"></i> Finanzas & Caja'
-            };
-            document.getElementById('pageTitle').innerHTML = titles[tabName] || 'AgroManager';
-
-            // Close sidebar on mobile after tab selection
-            if (window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.add('hidden');
-            }
-        };
-
-        // Modal Helpers
-        window.openModal = function(modalId) {
-            populateSelectOptions();
-            document.getElementById(modalId).classList.remove('hidden');
-        };
-
-        window.closeModal = function(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        };
-
-        function populateSelectOptions() {
-            // Populate Lote Select
-            const loteSelect = document.getElementById('avanceLoteSelect');
-            if (loteSelect) {
-                loteSelect.innerHTML = state.lotesGanado.length > 0 
-                    ? state.lotesGanado.map(l => `<option value="${l.nombre}">${l.nombre} (${l.cantidad} cabezas)</option>`).join('')
-                    : '<option value="">Sin lotes registrados</option>';
-            }
-
-            // Populate Cultivo Select
-            const cultivoSelect = document.getElementById('laborCultivoSelect');
-            if (cultivoSelect) {
-                cultivoSelect.innerHTML = state.cultivos.length > 0
-                    ? state.cultivos.map(c => `<option value="${c.nombre}">${c.nombre} (${c.tipo})</option>`).join('')
-                    : '<option value="">Sin cultivos registrados</option>';
-            }
-
-            // Populate Maquinaria Select
-            const mantSelect = document.getElementById('mantEquipoSelect');
-            if (mantSelect) {
-                mantSelect.innerHTML = state.maquinaria.length > 0
-                    ? state.maquinaria.map(m => `<option value="${m.nombre}">${m.nombre} - ${m.modelo}</option>`).join('')
-                    : '<option value="">Sin equipos registrados</option>';
-            }
-        }
-
-        // Form Handlers
-        window.handleSaveLoteGanado = async function(e) {
-            e.preventDefault();
-            const data = {
-                nombre: document.getElementById('loteNombre').value,
-                cantidad: parseInt(document.getElementById('loteCantidad').value) || 0,
-                raza: document.getElementById('loteRaza').value,
-                proposito: document.getElementById('loteProposito').value,
-                ubicacion: document.getElementById('loteUbicacion').value
-            };
-            await saveData('lotesGanado', data);
-            document.getElementById('formLoteGanado').reset();
-            closeModal('modalLoteGanado');
-        };
-
-        window.handleSaveAvanceGanado = async function(e) {
-            e.preventDefault();
-            const data = {
-                fecha: new Date().toISOString().split('T')[0],
-                lote: document.getElementById('avanceLoteSelect').value,
-                tipo: document.getElementById('avanceTipo').value,
-                detalle: document.getElementById('avanceDetalle').value,
-                notas: document.getElementById('avanceNotas').value
-            };
-            await saveData('avancesGanado', data);
-            document.getElementById('formAvanceGanado').reset();
-            closeModal('modalAvanceGanado');
-        };
-
-        window.handleSaveCultivo = async function(e) {
-            e.preventDefault();
-            const data = {
-                nombre: document.getElementById('cultivoNombre').value,
-                tipo: document.getElementById('cultivoTipo').value,
-                area: parseFloat(document.getElementById('cultivoArea').value) || 0,
-                fechaSiembra: document.getElementById('cultivoFechaSiembra').value,
-                fechaEst: document.getElementById('cultivoFechaEst').value
-            };
-            await saveData('cultivos', data);
-            document.getElementById('formCultivo').reset();
-            closeModal('modalCultivo');
-        };
-
-        window.handleSaveLabor = async function(e) {
-            e.preventDefault();
-            const data = {
-                fecha: new Date().toISOString().split('T')[0],
-                cultivo: document.getElementById('laborCultivoSelect').value,
-                tipo: document.getElementById('laborTipo').value,
-                insumos: document.getElementById('laborInsumos').value,
-                rendimiento: document.getElementById('laborRendimiento').value
-            };
-            await saveData('labores', data);
-            document.getElementById('formLabor').reset();
-            closeModal('modalLabor');
-        };
-
-        window.handleSaveMaquinaria = async function(e) {
-            e.preventDefault();
-            const data = {
-                nombre: document.getElementById('maqNombre').value,
-                modelo: document.getElementById('maqModelo').value,
-                horas: parseInt(document.getElementById('maqHoras').value) || 0,
-                estado: document.getElementById('maqEstado').value,
-                combustible: document.getElementById('maqCombustible').value
-            };
-            await saveData('maquinaria', data);
-            document.getElementById('formMaquinaria').reset();
-            closeModal('modalMaquinaria');
-        };
-
-        window.handleSaveMantenimiento = async function(e) {
-            e.preventDefault();
-            const data = {
-                fecha: new Date().toISOString().split('T')[0],
-                equipo: document.getElementById('mantEquipoSelect').value,
-                tipo: document.getElementById('mantTipo').value,
-                costo: parseFloat(document.getElementById('mantCosto').value) || 0,
-                proxFecha: document.getElementById('mantProxFecha').value
-            };
-            await saveData('mantenimientos', data);
-            document.getElementById('formMantenimiento').reset();
-            closeModal('modalMantenimiento');
-        };
-
-        window.handleSaveInsumo = async function(e) {
-            e.preventDefault();
-            const data = {
-                nombre: document.getElementById('insumoNombre').value,
-                categoria: document.getElementById('insumoCategoria').value,
-                unidad: document.getElementById('insumoUnidad').value,
-                stock: parseInt(document.getElementById('insumoStock').value) || 0,
-                minimo: parseInt(document.getElementById('insumoMinimo').value) || 0
-            };
-            await saveData('inventario', data);
-            document.getElementById('formInsumo').reset();
-            closeModal('modalInsumo');
-        };
-
-        window.handleSaveTransaccion = async function(e) {
-            e.preventDefault();
-            const data = {
-                fecha: new Date().toISOString().split('T')[0],
-                tipo: document.getElementById('transTipo').value,
-                monto: parseFloat(document.getElementById('transMonto').value) || 0,
-                categoria: document.getElementById('transCategoria').value,
-                descripcion: document.getElementById('transDescripcion').value
-            };
-            await saveData('finanzas', data);
-            document.getElementById('formTransaccion').reset();
-            closeModal('modalTransaccion');
-        };
-
-        window.handleDelete = async function(colName, id) {
-            if (confirm("¿Estás seguro de que deseas eliminar este registro?")) {
-                await deleteItem(colName, id);
-            }
-        };
-
-        // Main UI Render Function
-        function renderUI() {
-            renderDashboard();
-            renderGanaderia();
-            renderAgricultura();
-            renderMaquinaria();
-            renderInventario();
-            renderFinanzas();
-        }
-
-        // Render Dashboard Metrics & Charts
-        function renderDashboard() {
-            const totalCabezas = state.lotesGanado.reduce((acc, curr) => acc + (parseInt(curr.cantidad) || 0), 0);
-            document.getElementById('dashTotalGanado').innerText = totalCabezas;
-
-            document.getElementById('dashTotalCultivos').innerText = state.cultivos.length;
-            
-            const maqOperativas = state.maquinaria.filter(m => m.estado === 'Operativo').length;
-            document.getElementById('dashTotalMaquinaria').innerText = `${maqOperativas} / ${state.maquinaria.length}`;
-
-            // Calculate Balance
-            const ingresos = state.finanzas.filter(f => f.tipo === 'Ingreso').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
-            const gastos = state.finanzas.filter(f => f.tipo === 'Gasto').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
-            const balance = ingresos - gastos;
-            
-            const dashBalanceEl = document.getElementById('dashBalance');
-            dashBalanceEl.innerText = `$${balance.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
-            dashBalanceEl.className = balance >= 0 ? "text-3xl font-black text-emerald-600 mt-1" : "text-3xl font-black text-red-600 mt-1";
-
-            // Render Chart
-            renderChart(ingresos, gastos);
-
-            // Render Alerts
-            renderAlerts();
-        }
-
-        function renderAlerts() {
-            const container = document.getElementById('alertsList');
-            const alerts = [];
-
-            // Low Stock Alerts
-            state.inventario.forEach(item => {
-                if (parseInt(item.stock) <= parseInt(item.minimo)) {
-                    alerts.push(`
-                        <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded text-red-800 flex items-center justify-between">
-                            <div>
-                                <p class="font-bold text-xs"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Stock Bajo: ${item.nombre}</p>
-                                <p class="text-xs">Quedan ${item.stock} ${item.unidad} (Mín: ${item.minimo})</p>
-                            </div>
-                            <button onclick="switchTab('inventario')" class="text-xs text-red-700 underline font-semibold">Ver</button>
-                        </div>
-                    `);
-                }
-            });
-
-            // Maintenance Alerts
-            state.maquinaria.filter(m => m.estado !== 'Operativo').forEach(m => {
-                alerts.push(`
-                    <div class="p-3 bg-amber-50 border-l-4 border-amber-500 rounded text-amber-800 flex items-center justify-between">
-                        <div>
-                            <p class="font-bold text-xs"><i class="fa-solid fa-wrench mr-1"></i> Equipo en Service: ${m.nombre}</p>
-                            <p class="text-xs">Estado: ${m.estado}</p>
-                        </div>
-                        <button onclick="switchTab('maquinaria')" class="text-xs text-amber-700 underline font-semibold">Ver</button>
-                    </div>
-                `);
-            });
-
-            if (alerts.length === 0) {
-                container.innerHTML = `
-                    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-lg text-center text-xs font-medium border border-emerald-100">
-                        <i class="fa-solid fa-circle-check text-base text-emerald-600 mb-1 block"></i>
-                        No hay alertas críticas en el sistema. Todo marcha en orden.
-                    </div>
-                `;
-            } else {
-                container.innerHTML = alerts.join('');
-            }
-        }
-
-        function renderChart(ingresos, gastos) {
-            const ctx = document.getElementById('financeChart').getContext('2d');
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-
-            chartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Ingresos Totales ($)', 'Gastos Totales ($)'],
-                    datasets: [{
-                        label: 'Monto Total ($)',
-                        data: [ingresos, gastos],
-                        backgroundColor: ['#22c55e', '#ef4444'],
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
+                    const data = JSON.parse(evt.target.result);
+                    if (data.transactions) {
+                        categories = data.categories;
+                        transactions = data.transactions;
+                        profile = data.profile || profile;
+                        syncToFirebase();
                     }
+                } catch(err) {
+                    alert("Error al procesar el archivo JSON.");
                 }
-            });
-        }
-
-        function renderGanaderia() {
-            const grid = document.getElementById('gridLotesGanado');
-            if (state.lotesGanado.length === 0) {
-                grid.innerHTML = `<div class="col-span-full p-8 text-center text-gray-400 bg-white rounded-2xl border border-dashed border-gray-300">No hay lotes de ganado registrados. Presiona "+ Nuevo Lote" para comenzar.</div>`;
-            } else {
-                grid.innerHTML = state.lotesGanado.map(lote => `
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-bold text-gray-800 text-base">${lote.nombre}</h4>
-                                <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold">${lote.proposito}</span>
-                            </div>
-                            <div class="space-y-1 text-xs text-gray-600 my-3">
-                                <p><i class="fa-solid fa-cow text-emerald-600 w-4"></i> <strong>Cantidad:</strong> ${lote.cantidad} cabezas</p>
-                                <p><i class="fa-solid fa-dna text-emerald-600 w-4"></i> <strong>Raza:</strong> ${lote.raza}</p>
-                                <p><i class="fa-solid fa-location-dot text-emerald-600 w-4"></i> <strong>Potrero:</strong> ${lote.ubicacion}</p>
-                            </div>
-                        </div>
-                        <div class="pt-3 border-t border-gray-100 flex justify-end">
-                            <button onclick="handleDelete('lotesGanado', '${lote.id}')" class="text-xs text-red-500 hover:text-red-700 font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-trash-can"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // Render Avances
-            const tbody = document.getElementById('tbodyAvancesGanado');
-            if (state.avancesGanado.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-4 text-center text-gray-400">Sin eventos zootécnicos registrados</td></tr>`;
-            } else {
-                tbody.innerHTML = state.avancesGanado.map(a => `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-800">${a.fecha || '-'}</td>
-                        <td class="px-4 py-3 font-semibold text-emerald-700">${a.lote}</td>
-                        <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700">${a.tipo}</span></td>
-                        <td class="px-4 py-3">${a.detalle}</td>
-                        <td class="px-4 py-3 text-xs text-gray-500">${a.notas || '-'}</td>
-                    </tr>
-                `).join('');
-            }
-        }
-
-        function renderAgricultura() {
-            const grid = document.getElementById('gridCultivos');
-            if (state.cultivos.length === 0) {
-                grid.innerHTML = `<div class="col-span-full p-8 text-center text-gray-400 bg-white rounded-2xl border border-dashed border-gray-300">No hay parcelas agrícolas registradas.</div>`;
-            } else {
-                grid.innerHTML = state.cultivos.map(c => `
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-bold text-gray-800 text-base">${c.nombre}</h4>
-                                <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">${c.tipo}</span>
-                            </div>
-                            <div class="space-y-1 text-xs text-gray-600 my-3">
-                                <p><i class="fa-solid fa-vector-square text-amber-600 w-4"></i> <strong>Área:</strong> ${c.area} Hectáreas</p>
-                                <p><i class="fa-solid fa-calendar-day text-amber-600 w-4"></i> <strong>Siembra:</strong> ${c.fechaSiembra}</p>
-                                <p><i class="fa-solid fa-wheat-awn text-amber-600 w-4"></i> <strong>Est. Cosecha:</strong> ${c.fechaEst || 'N/A'}</p>
-                            </div>
-                        </div>
-                        <div class="pt-3 border-t border-gray-100 flex justify-end">
-                            <button onclick="handleDelete('cultivos', '${c.id}')" class="text-xs text-red-500 hover:text-red-700 font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-trash-can"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // Render Labores
-            const tbody = document.getElementById('tbodyLabores');
-            if (state.labores.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-4 text-center text-gray-400">Sin labores agrícolas registradas</td></tr>`;
-            } else {
-                tbody.innerHTML = state.labores.map(l => `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3">${l.fecha || '-'}</td>
-                        <td class="px-4 py-3 font-semibold text-amber-700">${l.cultivo}</td>
-                        <td class="px-4 py-3">${l.tipo}</td>
-                        <td class="px-4 py-3">${l.insumos || 'N/A'}</td>
-                        <td class="px-4 py-3 font-bold text-gray-800">${l.rendimiento || '-'}</td>
-                    </tr>
-                `).join('');
-            }
-        }
-
-        function renderMaquinaria() {
-            const grid = document.getElementById('gridMaquinaria');
-            if (state.maquinaria.length === 0) {
-                grid.innerHTML = `<div class="col-span-full p-8 text-center text-gray-400 bg-white rounded-2xl border border-dashed border-gray-300">No hay maquinaria registrada.</div>`;
-            } else {
-                grid.innerHTML = state.maquinaria.map(m => `
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-bold text-gray-800 text-base">${m.nombre}</h4>
-                                <span class="text-xs px-2.5 py-1 rounded-full font-bold ${
-                                    m.estado === 'Operativo' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
-                                }">${m.estado}</span>
-                            </div>
-                            <div class="space-y-1 text-xs text-gray-600 my-3">
-                                <p><i class="fa-solid fa-id-card text-blue-600 w-4"></i> <strong>Modelo:</strong> ${m.modelo}</p>
-                                <p><i class="fa-solid fa-stopwatch text-blue-600 w-4"></i> <strong>Horómetro/Km:</strong> ${m.horas} hrs</p>
-                                <p><i class="fa-solid fa-gas-pump text-blue-600 w-4"></i> <strong>Combustible:</strong> ${m.combustible}</p>
-                            </div>
-                        </div>
-                        <div class="pt-3 border-t border-gray-100 flex justify-end">
-                            <button onclick="handleDelete('maquinaria', '${m.id}')" class="text-xs text-red-500 hover:text-red-700 font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-trash-can"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // Render Service
-            const tbody = document.getElementById('tbodyMantenimientos');
-            if (state.mantenimientos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-4 text-center text-gray-400">Sin historial de mantenimiento</td></tr>`;
-            } else {
-                tbody.innerHTML = state.mantenimientos.map(m => `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3">${m.fecha || '-'}</td>
-                        <td class="px-4 py-3 font-semibold text-blue-700">${m.equipo}</td>
-                        <td class="px-4 py-3">${m.tipo}</td>
-                        <td class="px-4 py-3 font-bold text-gray-800">$${parseFloat(m.costo || 0).toFixed(2)}</td>
-                        <td class="px-4 py-3 text-xs text-amber-700 font-semibold">${m.proxFecha || 'N/A'}</td>
-                    </tr>
-                `).join('');
-            }
-        }
-
-        function renderInventario() {
-            const tbody = document.getElementById('tbodyInventario');
-            if (state.inventario.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-4 text-center text-gray-400">Sin insumos registrados</td></tr>`;
-            } else {
-                tbody.innerHTML = state.inventario.map(item => {
-                    const isLow = parseInt(item.stock) <= parseInt(item.minimo);
-                    return `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 font-bold text-gray-800">${item.nombre}</td>
-                            <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs bg-purple-50 text-purple-700 font-medium">${item.categoria}</span></td>
-                            <td class="px-4 py-3 font-bold ${isLow ? 'text-red-600' : 'text-emerald-600'}">${item.stock}</td>
-                            <td class="px-4 py-3 text-gray-400">${item.minimo}</td>
-                            <td class="px-4 py-3 text-xs text-gray-500">${item.unidad}</td>
-                            <td class="px-4 py-3 text-right">
-                                <button onclick="handleDelete('inventario', '${item.id}')" class="text-xs text-red-500 hover:text-red-700 font-semibold">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-        }
-
-        function renderFinanzas() {
-            const tbody = document.getElementById('tbodyFinanzas');
-            if (state.finanzas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-4 text-center text-gray-400">Sin transacciones registradas</td></tr>`;
-            } else {
-                tbody.innerHTML = state.finanzas.map(f => {
-                    const isIngreso = f.tipo === 'Ingreso';
-                    return `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-xs text-gray-500">${f.fecha || '-'}</td>
-                            <td class="px-4 py-3">
-                                <span class="px-2 py-0.5 rounded text-xs font-bold ${isIngreso ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
-                                    ${f.tipo}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-gray-700 font-medium">${f.categoria}</td>
-                            <td class="px-4 py-3 text-gray-600">${f.descripcion}</td>
-                            <td class="px-4 py-3 text-right font-black ${isIngreso ? 'text-emerald-600' : 'text-red-600'}">
-                                ${isIngreso ? '+' : '-'}$${parseFloat(f.monto || 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
+            };
+            if (e.target.files[0]) reader.readAsText(e.target.files[0]);
         }
     </script>
 </body>
